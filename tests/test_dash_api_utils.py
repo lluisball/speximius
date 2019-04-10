@@ -45,6 +45,7 @@ def test_sh_connection_context():
     'jobs, expected', [
         ([1,2,3,4,5], [1,2,3,4,5]),
         ([1,1,2,2,3,4,5], [1,2,3,4,5]),
+        ([], [])
     ]
 )
 def test_jobs_iter(jobs, expected):
@@ -52,3 +53,28 @@ def test_jobs_iter(jobs, expected):
     mock_connection.jobs_iter = lambda **kw: jobs
 
     assert expected == list(jobs_iter(mock_connection))
+
+
+def test_jobs_iter_connect_issues():
+    ''' Simulate an exception during job iteration consumtion,
+    ensure that despite of starting over we pause and get the
+    rigth result, duplicates free.
+    '''
+
+    times = iter([0, 1])
+    def mock_iter(**kwargs):
+        times_now = next(times)
+        if times_now == 1:
+            for x in [1, 2, 3, 42]:
+                yield x
+        elif times_now == 0:
+            yield 1
+            raise ValueError()
+
+    mock_connection = Mock()
+    mock_connection.jobs_iter = mock_iter
+
+    mock_sleep = Mock()
+    with patch('speximius.dash_api_utils.sleep', mock_sleep):
+        assert list(jobs_iter(mock_connection))  == [1, 2, 3, 42]
+    assert mock_sleep.call_count == 1

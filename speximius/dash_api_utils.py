@@ -16,7 +16,7 @@ from scrapinghub import ScrapinghubClient
 JOBS_PER_PAGE = 1000
 ITEMS_PER_PAGE = 4000
 MAX_COLLECTION_RETRIES = 60
-
+MAX_JOBS_RETRIES = 120
 
 class SHConnection():
     ''' Wrapper for scrapinghub client, project and api calls
@@ -91,7 +91,8 @@ def get_jobs(sh_connection, spider_name=None, has_tag=None,
 
 def jobs_iter(sh_connection, **kwargs):
     served_jobs = []
-    while True:
+    retries = 0
+    while retries < MAX_JOBS_RETRIES:
         try:
             jobs = sh_connection.jobs_iter(**kwargs)
             for job in jobs:
@@ -99,12 +100,13 @@ def jobs_iter(sh_connection, **kwargs):
                     served_jobs.append(job)
                     yield job
             return
-        except Exception:
+        except Exception as e:
             #TODO: check if with lastest scrapinghub API, auto-retries are
             # implemented at the client level and this is not needed.
 
             #Manage scrapy cloud bad status line or some similar situation
             sleep(1)
+            retries += 1
 
 
 def get_undelivered_jobs(sh_connection, spider_name, lacks_tags=None):
