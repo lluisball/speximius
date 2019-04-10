@@ -3,15 +3,15 @@ import pytest
 from unittest.mock import patch, Mock
 
 from speximius.dash_api_utils import (
-    resolve_project_key, SHConnection
+    resolve_project_key, SHConnection, jobs_iter
 )
 
 
 @pytest.mark.parametrize(
     'environ, project_key, expected', [
-        ({'SHUB_JOB_DATA': '{"project": "666"}'} , None, '666'),
-        ({'SHUB_JOB_DATA': '{"project": "666"}'} , '999', '666'),
-        ({'SHUB_JOB_DATA': None} , '999', '999')
+        ({'SHUB_JOB_DATA': '{"project": "666"}'}, None, '666'),
+        ({'SHUB_JOB_DATA': '{"project": "666"}'}, '999', '666'),
+        ({'SHUB_JOB_DATA': None}, '999', '999')
     ]
 )
 def test_resolve_project_key(environ, project_key, expected):
@@ -19,12 +19,15 @@ def test_resolve_project_key(environ, project_key, expected):
         res = resolve_project_key(default_project_key=project_key)
         assert res == expected
 
+
 def test_resolve_project_key_errors():
     with pytest.raises(NameError):
-        res = resolve_project_key()
+        resolve_project_key()
+
 
 def test_sh_connection_context():
     client_mock = Mock()
+
     def client_class_mock(*args):
         return client_mock
 
@@ -32,7 +35,20 @@ def test_sh_connection_context():
         with SHConnection(
             'MOCK_API_KEY', default_project_key='666'
         ) as sh_conn:
-            project = sh_conn.project
+            sh_conn.project
 
     client_mock.get_project.assert_called_once()
     client_mock.close.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    'jobs, expected', [
+        ([1,2,3,4,5], [1,2,3,4,5]),
+        ([1,1,2,2,3,4,5], [1,2,3,4,5]),
+    ]
+)
+def test_jobs_iter(jobs, expected):
+    mock_connection = Mock()
+    mock_connection.jobs_iter = lambda **kw: jobs
+
+    assert expected == list(jobs_iter(mock_connection))

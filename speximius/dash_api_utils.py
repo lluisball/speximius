@@ -100,7 +100,10 @@ def jobs_iter(sh_connection, **kwargs):
                     yield job
             return
         except Exception:
-            # scrapy cloud bad status line or some similar situation
+            #TODO: check if with lastest scrapinghub API, auto-retries are
+            # implemented at the client level and this is not needed.
+
+            #Manage scrapy cloud bad status line or some similar situation
             sleep(1)
 
 
