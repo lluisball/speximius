@@ -18,22 +18,10 @@ ITEMS_PER_PAGE = 4000
 MAX_COLLECTION_RETRIES = 60
 
 
-def resolve_project_key(default_project_key=None):
-    try:
-        data = json.loads(os.environ['SHUB_JOB_DATA'])
-        project_key = data['project']
-        return project_key
-
-    except Exception:
-        if default_project_key:
-            return default_project_key
-        raise NameError(
-            'When executing in dev local environments you must'
-            ' provide a project key'
-        )
-
-
 class SHConnection():
+    ''' Wrapper for scrapinghub client, project and api calls
+    to simplify use.
+    '''
 
     def __init__(self, api_key, default_project_key=None):
         self.api_key = api_key
@@ -48,6 +36,27 @@ class SHConnection():
 
     def __exit__(self, *args):
         self.client.close()
+
+    def jobs_iter(self, **kwargs):
+        return self.project.jobs.iter(**kwargs)
+
+    def get_job(self, job_id):
+        return self.client.get_job(job_id)
+
+
+def resolve_project_key(default_project_key=None):
+    try:
+        data = json.loads(os.environ['SHUB_JOB_DATA'])
+        project_key = data['project']
+        return project_key
+
+    except Exception:
+        if default_project_key:
+            return default_project_key
+        raise NameError(
+            'When executing in dev local environments you must'
+            ' provide a project key'
+        )
 
 
 def get_jobs(sh_connection, spider_name=None, has_tag=None,
@@ -67,7 +76,7 @@ def get_jobs(sh_connection, spider_name=None, has_tag=None,
             kwargs['state'] = status
 
         has_jobs = False
-        for job in jobs_iter(sh_connection.project, **kwargs):
+        for job in jobs_iter(sh_connection, **kwargs):
             job_count += 1
             job_key = job.get('key')
             yield (job_key if not all_job else job)
@@ -84,7 +93,7 @@ def jobs_iter(sh_connection, **kwargs):
     served_jobs = []
     while True:
         try:
-            jobs = sh_connection.project.jobs.iter(**kwargs)
+            jobs = sh_connection.jobs_iter(**kwargs)
             for job in jobs:
                 if job not in served_jobs:
                     served_jobs.append(job)
@@ -100,7 +109,7 @@ def get_undelivered_jobs(sh_connection, spider_name, lacks_tags=None):
     if lacks_tags:
         tags.extend(lacks_tags)
     return get_jobs(
-        sh_connection.project, spider_name, lacks_tag=tags
+        sh_connection, spider_name, lacks_tag=tags
     )
 
 
@@ -110,7 +119,7 @@ def get_job_items(sh_connection, job_id, logger=None):
 
     start_indx = 0
     has_items = False
-    job = sh_connection.client.get_job(job_id)
+    job = sh_connection.get_job(job_id)
 
     while True:
         has_items = False
