@@ -18,6 +18,7 @@ ITEMS_PER_PAGE = 4000
 MAX_COLLECTION_RETRIES = 60
 MAX_JOBS_RETRIES = 120
 
+
 class SHConnection():
     ''' Wrapper for scrapinghub client, project and api calls
     to simplify use.
@@ -68,7 +69,7 @@ def get_jobs(sh_connection, spider_name=None, has_tag=None,
     while True:
         kwargs = dict(
             lacks_tag=lacks_tag, has_tag=has_tag,
-            start=start, count=max_count or 1000, startts=startts
+            start=start, count=max_count or JOBS_PER_PAGE, startts=startts
         )
         if spider_name:
             kwargs['spider'] = spider_name

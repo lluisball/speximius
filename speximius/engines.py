@@ -8,12 +8,12 @@ from uuid import uuid4
 from time import sleep
 from itertools import cycle
 
-from circleup.settings import UTILITY_APIKEYS
-from circleup.utils.cloud import (
-    sh_connection, get_jobs, get_job_items, post_to_collection,
-    get_collection_item
+from #TODO.settings import UTILITY_APIKEYS
+from speximius.dash_api_utils import (
+    sh_connection, get_jobs, get_job_items,
+    post_to_collection, get_collection_item
 )
-from circleup.utils.project import (
+from #TODO.utils.project import (
     get_project_settings, get_logger, DEV_PROJECT_ID
 )
 
@@ -381,7 +381,7 @@ class ParallelItemDispatcher(ParallelJobsDispatcher):
         return args
 
 
-class InstacartParallelItemDispatcher(ParallelItemDispatcher):
+class ResourcesParallelItemDispatcher(ParallelItemDispatcher):
 
     @property
     def logins(self):

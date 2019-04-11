@@ -48,7 +48,7 @@ As an example, in order to implement this within a spider:
 
 1. Inherit parallelisation class:
 
-        from circleup.utils.parallel.spiders import ParallelItemWorkerSpider
+        from speximius.spiders import ParallelItemWorkerSpider
 
         class BedbathandbeyondAvailability(ParallelItemWorkerSpider,
                                            AvailabilitySpider,

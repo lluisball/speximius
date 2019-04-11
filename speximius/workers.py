@@ -1,7 +1,9 @@
 import argparse
 
-from circleup.utils.cloud import sh_connection
-from circleup.utils.project import (
+from speximius.dash_api_utils import sh_connection
+
+
+from #TODO.utils.project import (
     get_project_settings, get_logger, DEV_PROJECT_ID
 )
 

@@ -5,11 +5,13 @@ from six import string_types
 from scrapy import Spider, Request, Item, Field
 from scrapinghub import HubstorageClient
 
-from circleup.utils.project import (
+from #TODO.utils.project import (
     get_project_settings, DEV_PROJECT_ID
 )
-from circleup.utils.cloud import sh_connection, post_to_collection
-from circleup.settings import SCRAPINGHUB_APIKEY, PROJECT_ID
+from speximius.dash_api_utils import (
+    sh_connection, post_to_collection
+)
+from #TODO.settings import SCRAPINGHUB_APIKEY, PROJECT_ID
 from circleup.utils.parallel.engines import (
     COLLS_API_URL, ParallelItemDispatcher
 )
